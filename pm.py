@@ -1,54 +1,62 @@
 from PIL import Image
 
-def encrypt_image(image_path, key):
+def encrypt_image(image_path):
     # Open the image
     img = Image.open(image_path)
     width, height = img.size
     
-    # Convert the image to RGB mode
-    img = img.convert("RGB")
+    # Get the pixel data
+    pixels = img.load()
     
-    # Create a new image to store the encrypted pixels
-    encrypted_img = Image.new("RGB", (width, height))
-    
-    # Iterate through each pixel and apply encryption
-    for x in range(width):
-        for y in range(height):
-            r, g, b = img.getpixel((x, y))
-            # Apply encryption algorithm (for example, XOR with a key)
-            r ^= key
-            g ^= key
-            b ^= key
-            encrypted_img.putpixel((x, y), (r, g, b))
+    # Encrypting the image by swapping pixel values
+    for y in range(height):
+        for x in range(width):
+            r, g, b = pixels[x, y]
+            # Example of pixel manipulation: swapping red and blue components
+            pixels[x, y] = (b, g, r)
     
     # Save the encrypted image
-    encrypted_img.save("encrypted_image.png")
-    print("Image encrypted successfully!")
+    encrypted_path = image_path.split('.')[0] + '_encrypted.png'
+    img.save(encrypted_path)
+    print("Image encrypted and saved as", encrypted_path)
 
-def decrypt_image(encrypted_image_path, key):
+def decrypt_image(image_path):
     # Open the encrypted image
-    encrypted_img = Image.open(encrypted_image_path)
-    width, height = encrypted_img.size
+    img = Image.open(image_path)
+    width, height = img.size
     
-    # Create a new image to store the decrypted pixels
-    decrypted_img = Image.new("RGB", (width, height))
+    # Get the pixel data
+    pixels = img.load()
     
-    # Iterate through each pixel and apply decryption
-    for x in range(width):
-        for y in range(height):
-            r, g, b = encrypted_img.getpixel((x, y))
-            # Apply decryption algorithm (in this case, XOR with the same key)
-            r ^= key
-            g ^= key
-            b ^= key
-            decrypted_img.putpixel((x, y), (r, g, b))
+    # Decrypting the image by swapping pixel values back
+    for y in range(height):
+        for x in range(width):
+            r, g, b = pixels[x, y]
+            # Example of pixel manipulation: swapping red and blue components back
+            pixels[x, y] = (b, g, r)
     
     # Save the decrypted image
-    decrypted_img.save("decrypted_image.png")
-    print("Image decrypted successfully!")
+    decrypted_path = image_path.split('_encrypted.')[0] + '_decrypted.png'
+    img.save(decrypted_path)
+    print("Image decrypted and saved as", decrypted_path)
 
-# Example usage
-image_path = "example_image.png"
-key = 123  # Choose a key for encryption/decryption
-encrypt_image(image_path, key)
-decrypt_image("encrypted_image.png", key)
+def main():
+    while True:
+        choice = input("Do you want to encrypt or decrypt the image? (e/d): ").strip().lower()
+        if choice not in ('e', 'd'):
+            print("Invalid choice. Please enter 'e' for encryption or 'd' for decryption.")
+            continue
+
+        image_path = input("Enter the path to the image file: ").strip()
+
+        if choice == 'e':
+            encrypt_image(image_path)
+        else:
+            decrypt_image(image_path)
+
+        another = input("Do you want to continue? (yes/no): ").strip().lower()
+        if another != 'yes':
+            break
+
+if __name__ == "__main__":
+    main()
